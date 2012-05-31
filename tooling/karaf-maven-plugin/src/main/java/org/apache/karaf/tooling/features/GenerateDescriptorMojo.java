@@ -167,6 +167,15 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      */
     private boolean addBundlesToPrimaryFeature;
 
+    /**
+     * The standard behavior is to add any dependencies other than those in the <code>runtime</code> scope to the feature bundle.
+     * Setting this flag to "true" disables adding any dependencies (transient or otherwise) that are in
+     * <code>&lt;scope&gt;provided&lt;/scope&gt;</code>.
+     *
+     * @parameter default-value="false"
+     */
+    private boolean ignoreScopeProvided;
+
     // *************************************************
     // READ-ONLY MAVEN PLUGIN PARAMETERS
     // *************************************************
@@ -352,7 +361,10 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
                 if (bundle == null) {
                     bundle = objectFactory.createBundle();
                     bundle.setLocation(bundleName);
-                    feature.getBundle().add(bundle);
+
+                    if (!"provided".equals(entry.getValue()) || !ignoreScopeProvided) {
+                        feature.getBundle().add(bundle);
+                    }
                 }
                 if ("runtime".equals(entry.getValue())) {
                     bundle.setDependency(true);
